@@ -1,7 +1,9 @@
 import pygame
 import argparse
 import requests
+import os
 import io
+from PIL import Image
 
 
 def setup_screen():
@@ -16,10 +18,17 @@ def request_map_image(ll, spn):
         'll': ll,
         'spn': spn
     }
-    map_api_server = 'http://static-maps.yandex.ru/1.x/'
-    response = requests.get(map_api_server, params=map_params)
-    return io.BytesIO(response.content)
+    server_address = 'https://static-maps.yandex.ru/v1?'
+    api_key = 'f3a0fe3a-b07e-4840-a1da-06f18b2ddf13'
+    ll_spn = 'll=37.530887,55.703118&spn=0.002,0.002'
+    map_request = f"{server_address}{ll_spn}&apikey={api_key}"
+    response = requests.get(map_request)
 
+    map_file = "map.jpg"
+    with open(map_file, "wb") as file:
+        file.write(response.content)
+
+    return map_file
 
 def main():
     screen = setup_screen()
@@ -33,6 +42,7 @@ def main():
     while pygame.event.wait().type != pygame.QUIT:
         pass
     pygame.quit()
+    os.remove(map_image)
 
 
 if __name__ == '__main__':
