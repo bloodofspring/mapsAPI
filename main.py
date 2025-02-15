@@ -33,7 +33,8 @@ def main():
     parser.add_argument('--spn', type=str)
     args = parser.parse_args()
     map_image = request_map_image(ll=args.ll, spn=args.spn)
-    screen.blit(pygame.image.load(map_image), (0, 0))
+    pg_image = pygame.image.load(map_image)
+    screen.blit(pg_image, ((1100 - pg_image.get_width()) // 2, (700 - pg_image.get_height()) // 2))
     pygame.display.flip()
     while pygame.event.wait().type != pygame.QUIT:
         pass
