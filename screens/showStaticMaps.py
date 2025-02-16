@@ -25,13 +25,17 @@ class ShowStaticMapsScreen(AbstractScreen):
         a, b = map(float, self.spn.split(","))
         if a < bottom_spn_limit:
             a = bottom_spn_limit
+            self.show_scale_limit_text = True
         elif a > top_spn_limit:
             a = top_spn_limit
+            self.show_scale_limit_text = True
 
         if b < bottom_spn_limit:
             b = bottom_spn_limit
+            self.show_scale_limit_text = True
         elif b > top_spn_limit:
             b = top_spn_limit
+            self.show_scale_limit_text = True
 
         self.spn = ",".join(map(str, (a, b,)))
 
@@ -56,16 +60,16 @@ class ShowStaticMapsScreen(AbstractScreen):
 
     def change_spn(self, d: float):
         a, b = map(float, self.spn.split(","))
-
-        if not (bottom_spn_limit <= a + d <= top_spn_limit and bottom_spn_limit <= b + d <= top_spn_limit):
-            self.show_scale_limit_text = True
-            return
-
         self.show_scale_limit_text = False
 
         a += d
         b += d
         self.spn = ",".join(map(str, (a, b,)))
+        self.check_spn()
+
+    @property
+    def scale(self):
+        return float(self.spn.split(",")[0])
 
     def change_position(self, *, ll_d: float = 0.0, ln_d: float = 0.0):
         ln, ll = map(float, self.ll.split(","))
@@ -83,23 +87,23 @@ class ShowStaticMapsScreen(AbstractScreen):
             if event.type != pygame.KEYUP:
                 continue
 
-            if event.key == pygame.K_PAGEUP:
+            if event.key == pygame.K_q:  # pygame.K_PAGEUP:
                 self.change_spn(-0.005)
 
-            if event.key == pygame.K_PAGEDOWN:
+            if event.key == pygame.K_w:  # pygame.K_PAGEDOWN:
                 self.change_spn(0.005)
 
             if event.key == pygame.K_UP:
-                self.change_position(ll_d=0.01)
+                self.change_position(ll_d=self.scale)
 
             if event.key == pygame.K_RIGHT:
-                self.change_position(ln_d=0.01)
+                self.change_position(ln_d=self.scale)
 
             if event.key == pygame.K_DOWN:
-                self.change_position(ll_d=-0.01)
+                self.change_position(ll_d=-self.scale)
 
             if event.key == pygame.K_LEFT:
-                self.change_position(ln_d=-0.01)
+                self.change_position(ln_d=-self.scale)
 
     def update(self, events, **kwargs):
         self.handle_events(events)
@@ -111,9 +115,7 @@ class ShowStaticMapsScreen(AbstractScreen):
         self.last_request_image.seek(0)
 
         pg_image = pygame.image.load(self.last_request_image)
-        self.screen.blit(pg_image,
-                         ((window_width - pg_image.get_width()) // 2, (window_height - pg_image.get_height()) // 2))
+        self.screen.blit(pg_image, ((window_width - pg_image.get_width()) // 2, (window_height - pg_image.get_height()) // 2))
 
-        rendered_text = self.font.render("You  reached  scale  limit!", True,
-                                         "white" if self.show_scale_limit_text else "black")
+        rendered_text = self.font.render("You  reached  scale  limit!", True, "white" if self.show_scale_limit_text else "black")
         self.screen.blit(rendered_text, ((window_width - rendered_text.get_width()) // 2, window_height - 50))
