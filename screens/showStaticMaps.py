@@ -56,10 +56,10 @@ class ShowStaticMapsScreen(AbstractScreen):
             if event.type != pygame.KEYUP:
                 continue
 
-            if event.key == pygame.K_UP:  # pygame.K_PAGEUP
+            if event.key == pygame.K_PAGEUP:
                 self.change_spn(-0.005)
 
-            if event.key == pygame.K_DOWN:  # pygame.K_PAGEDOWN
+            if event.key == pygame.K_PAGEDOWN:
                 self.change_spn(0.005)
 
     def update(self, events, **kwargs):
