@@ -14,10 +14,26 @@ class ShowStaticMapsScreen(AbstractScreen):
 
         self.ll = args.ll
         self.spn = args.spn
+        self.check_spn()
+
         self.last_request_params = {"ll": self.ll, "spn": self.spn}
         self.last_request_image: io.BytesIO | None = None
         self.show_limit_text: bool = False
         self.font = pygame.font.Font("static/fonts/pixelFont.TTF", 40)
+
+    def check_spn(self):
+        a, b = map(float, self.spn.split(","))
+        if a < bottom_spn_limit:
+            a = bottom_spn_limit
+        elif a > top_spn_limit:
+            a = top_spn_limit
+
+        if b < bottom_spn_limit:
+            b = bottom_spn_limit
+        elif b > top_spn_limit:
+            b = top_spn_limit
+
+        self.spn = ",".join(map(str, (a, b,)))
 
     @property
     def should_update(self):
