@@ -13,6 +13,7 @@ class ShowStaticMapsScreen(AbstractScreen):
         super().__init__(screen=screen, runner=runner)
 
         self.ll = args.ll
+        self.check_ll()
         self.spn = args.spn
         self.check_spn()
 
@@ -38,6 +39,21 @@ class ShowStaticMapsScreen(AbstractScreen):
             self.show_scale_limit_text = True
 
         self.spn = ",".join(map(str, (a, b,)))
+
+    def check_ll(self):
+        ln, ll = map(float, self.ll.split(","))
+
+        if ln < longitude_range[0]:
+            ln = longitude_range[0]
+        elif ln > longitude_range[1]:
+            ln = longitude_range[1]
+
+        if ll < latitude_range[0]:
+            ll = latitude_range[0]
+        elif ll > latitude_range[1]:
+            ll = latitude_range[1]
+
+        self.ll = ",".join(map(str, (ln, ll,)))
 
     @property
     def should_update(self):
@@ -74,23 +90,21 @@ class ShowStaticMapsScreen(AbstractScreen):
     def change_position(self, *, ll_d: float = 0.0, ln_d: float = 0.0):
         ln, ll = map(float, self.ll.split(","))
 
-        if not (latitude_range[0] < ll + ll_d < latitude_range[1] and longitude_range[0] < ln + ln_d < longitude_range[1]):
-            return
-
         ll += ll_d
         ln += ln_d
 
         self.ll = ",".join(map(str, (ln, ll,)))
+        self.check_ll()
 
     def handle_events(self, events):
         for event in events:
             if event.type != pygame.KEYUP:
                 continue
 
-            if event.key == pygame.K_q:  # pygame.K_PAGEUP:
+            if event.key == pygame.K_PAGEUP:  # pygame.K_q:
                 self.change_spn(-0.005)
 
-            if event.key == pygame.K_w:  # pygame.K_PAGEDOWN:
+            if event.key == pygame.K_PAGEDOWN:  # pygame.K_w:
                 self.change_spn(0.005)
 
             if event.key == pygame.K_UP:
