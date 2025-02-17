@@ -12,6 +12,8 @@ class ShowStaticMapsScreen(AbstractScreen):
     def __init__(self, screen: pygame.Surface, runner, args: argparse.Namespace):
         super().__init__(screen=screen, runner=runner)
 
+        self.theme_update_flag: bool = False
+        self.theme = 'light'
         self.ll = args.ll
         self.check_ll()
         self.spn = args.spn
@@ -65,6 +67,7 @@ class ShowStaticMapsScreen(AbstractScreen):
     def request_map_image(self) -> io.BytesIO:
         map_params = {
             'll': self.ll,
+            'theme': self.theme,
             'spn': self.spn,
             'l': 'map',
             'apikey': 'f3a0fe3a-b07e-4840-a1da-06f18b2ddf13'
@@ -96,6 +99,10 @@ class ShowStaticMapsScreen(AbstractScreen):
         self.ll = ",".join(map(str, (ln, ll,)))
         self.check_ll()
 
+    def change_theme(self):
+        self.theme = ['dark', 'light'][['dark', 'light'].index(self.theme) - 1]
+        self.theme_update_flag = True
+
     def handle_events(self, events):
         for event in events:
             if event.type != pygame.KEYUP:
@@ -103,9 +110,14 @@ class ShowStaticMapsScreen(AbstractScreen):
 
             if event.key == pygame.K_PAGEUP:  # pygame.K_q:
                 self.change_spn(-0.005)
+                continue
 
             if event.key == pygame.K_PAGEDOWN:  # pygame.K_w:
                 self.change_spn(0.005)
+                continue
+
+            if event.key == pygame.K_t:
+                self.change_theme()
 
             if event.key == pygame.K_UP:
                 self.change_position(ll_d=self.scale)
@@ -122,8 +134,9 @@ class ShowStaticMapsScreen(AbstractScreen):
     def update(self, events, **kwargs):
         self.handle_events(events)
 
-        if self.should_update:
+        if self.should_update or self.theme_update_flag:
             self.last_request_image = self.request_map_image()
+            self.theme_update_flag = False
 
         self.last_request_image.close = lambda: None
         self.last_request_image.seek(0)
